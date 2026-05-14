@@ -1,0 +1,17 @@
+{
+  "name": "essa-vaga-e-pra-mim",
+  "version": "1.0.0",
+  "description": "Analise sua compatibilidade com qualquer vaga usando IA",
+  "main": "index.js",
+  "scripts": {
+    "dev": "vercel dev",
+    "start": "node api/analisar.js"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.20.0",
+    "axios": "^1.6.0",
+    "cheerio": "^1.0.0-rc.12",
+    "pdf-parse": "^1.1.1",
+    "multer": "^1.4.5-lts.1"
+  }
+}
