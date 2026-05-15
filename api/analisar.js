@@ -5,7 +5,6 @@ const pdfParse = require('pdf-parse');
 // ── Leitura de DOCX (ZIP + XML via zlib, sem dependências externas) ──
 function lerDOCX(buffer) {
   try {
-    // 1. Localizar End of Central Directory Record (assinatura 0x06054b50)
     const eocdMin = Math.max(0, buffer.length - 65557);
     let eocdOffset = -1;
     for (let i = buffer.length - 22; i >= eocdMin; i--) {
@@ -19,7 +18,6 @@ function lerDOCX(buffer) {
     const cdEntries = buffer.readUInt16LE(eocdOffset + 10);
     const cdOffset = buffer.readUInt32LE(eocdOffset + 16);
 
-    // 2. Percorrer Central Directory procurando word/document.xml
     let offset = cdOffset;
     let documentXml = null;
 
@@ -55,7 +53,6 @@ function lerDOCX(buffer) {
 
     if (!documentXml) return null;
 
-    // 3. Converter XML em texto plano preservando quebras de parágrafo
     const texto = documentXml
       .replace(/<w:tab\s*\/?>/g, '\t')
       .replace(/<w:br\s*\/?>/g, '\n')
@@ -76,6 +73,25 @@ function lerDOCX(buffer) {
   }
 }
 
+// Lê o body de forma robusta: usa req.body se Vercel já parseou,
+// senão lê o stream manualmente.
+function lerBody(req) {
+  if (req.body !== undefined && req.body !== null) {
+    if (typeof req.body === 'string') {
+      try { return Promise.resolve(JSON.parse(req.body)); } catch { return Promise.resolve({}); }
+    }
+    return Promise.resolve(req.body);
+  }
+  return new Promise((resolve) => {
+    let data = '';
+    req.on('data', chunk => data += chunk);
+    req.on('end', () => {
+      try { resolve(data ? JSON.parse(data) : {}); } catch { resolve({}); }
+    });
+    req.on('error', () => resolve({}));
+  });
+}
+
 module.exports = async (req, res) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
@@ -83,36 +99,41 @@ module.exports = async (req, res) => {
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'POST') return res.status(405).json({ error: 'Método não permitido' });
 
-  let body = '';
-  req.on('data', chunk => body += chunk);
-  req.on('end', async () => {
+  try {
+    if (!process.env.ANTHROPIC_API_KEY) {
+      return res.status(500).json({ error: 'ANTHROPIC_API_KEY não configurada no servidor.' });
+    }
+
+    const { vagaUrl, cvBase64, cvTipo } = await lerBody(req);
+    if (!vagaUrl) return res.status(400).json({ error: 'Link da vaga não informado.' });
+
+    const buffer = Buffer.from(cvBase64 || '', 'base64');
+    const tipo = (cvTipo || '').toLowerCase();
+
+    let cvTexto = '';
     try {
-      const { vagaUrl, cvBase64, cvTipo } = JSON.parse(body);
-      const buffer = Buffer.from(cvBase64 || '', 'base64');
-      
-      let cvTexto = '';
-      try {
-        if (cvTipo && cvTipo.includes('pdf')) {
-          const data = await pdfParse(buffer);
-          cvTexto = data.text.slice(0, 6000);
-        } else if (cvTipo && (cvTipo.includes('word') || cvTipo.includes('docx') || cvTipo.includes('officedocument'))) {
-          cvTexto = (lerDOCX(buffer) || '').slice(0, 6000);
-        } else {
-          cvTexto = buffer.toString('utf-8').slice(0, 6000);
-        }
-      } catch(e) {
-        cvTexto = buffer.toString('utf-8').replace(/[^\x20-\x7E\u00C0-\u024F\n]/g, ' ').slice(0, 6000);
+      if (tipo.includes('pdf')) {
+        const data = await pdfParse(buffer);
+        cvTexto = (data.text || '').slice(0, 6000);
+      } else if (tipo.includes('officedocument') || tipo.includes('word') || tipo.includes('docx')) {
+        cvTexto = (lerDOCX(buffer) || '').slice(0, 6000);
+      } else {
+        cvTexto = buffer.toString('utf-8').slice(0, 6000);
       }
+    } catch (e) {
+      cvTexto = buffer.toString('utf-8').replace(/[^\x20-\x7EÀ-ɏ\n]/g, ' ').slice(0, 6000);
+    }
 
-      const prompt = `Você é especialista sênior em recrutamento com 20 anos de experiência.\n\nLINK DA VAGA: ${vagaUrl}\n\nCURRÍCULO:\n${cvTexto || 'não enviado'}\n\nRetorne SOMENTE este JSON:\n{"score":75,"veredicto":"ATENÇÃO","resumo":"frase 1. frase 2.","pontos_fortes":["p1","p2","p3"],"gaps":["g1","g2","g3"],"cursos":[{"nome":"curso","plataforma":"Alura","motivo":"motivo"}],"proximos_passos":["a1","a2","a3"]}`;
+    const prompt = `Você é especialista sênior em recrutamento com 20 anos de experiência.\n\nLINK DA VAGA: ${vagaUrl}\n\nCURRÍCULO:\n${cvTexto || 'não enviado'}\n\nRetorne SOMENTE este JSON:\n{"score":75,"veredicto":"ATENÇÃO","resumo":"frase 1. frase 2.","pontos_fortes":["p1","p2","p3"],"gaps":["g1","g2","g3"],"cursos":[{"nome":"curso","plataforma":"Alura","motivo":"motivo"}],"proximos_passos":["a1","a2","a3"]}`;
 
-      const payload = JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 1500,
-        messages: [{ role: 'user', content: prompt }]
-      });
+    const payload = JSON.stringify({
+      model: 'claude-sonnet-4-20250514',
+      max_tokens: 1500,
+      messages: [{ role: 'user', content: prompt }]
+    });
 
-      const options = {
+    const apiRes = await new Promise((resolve, reject) => {
+      const apiReq = https.request({
         hostname: 'api.anthropic.com',
         path: '/v1/messages',
         method: 'POST',
@@ -122,26 +143,34 @@ module.exports = async (req, res) => {
           'anthropic-version': '2023-06-01',
           'Content-Length': Buffer.byteLength(payload)
         }
-      };
-
-      const apiRes = await new Promise((resolve, reject) => {
-        const apiReq = https.request(options, r => {
-          let data = '';
-          r.on('data', chunk => data += chunk);
-          r.on('end', () => resolve({ status: r.statusCode, data }));
-        });
-        apiReq.on('error', reject);
-        apiReq.write(payload);
-        apiReq.end();
+      }, r => {
+        let data = '';
+        r.on('data', chunk => data += chunk);
+        r.on('end', () => resolve({ status: r.statusCode, data }));
       });
+      apiReq.on('error', reject);
+      apiReq.write(payload);
+      apiReq.end();
+    });
 
-      const apiData = JSON.parse(apiRes.data);
-      const text = apiData?.content?.[0]?.text || '';
-      const resultado = JSON.parse(text.replace(/```json|```/g, '').trim());
-      return res.status(200).json(resultado);
+    let apiData;
+    try { apiData = JSON.parse(apiRes.data); } catch { apiData = {}; }
 
-    } catch(e) {
-      return res.status(500).json({ error: e.message });
+    if (apiRes.status !== 200) {
+      return res.status(502).json({ error: apiData?.error?.message || `Anthropic respondeu ${apiRes.status}` });
     }
-  });
+
+    const text = apiData?.content?.[0]?.text || '';
+    let resultado;
+    try {
+      resultado = JSON.parse(text.replace(/```json|```/g, '').trim());
+    } catch {
+      return res.status(500).json({ error: 'Resposta da IA não pôde ser interpretada. Tente novamente.' });
+    }
+    return res.status(200).json(resultado);
+
+  } catch (e) {
+    console.error('Erro no handler:', e);
+    return res.status(500).json({ error: e.message || 'Erro interno.' });
+  }
 };
