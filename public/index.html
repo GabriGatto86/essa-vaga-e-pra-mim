@@ -185,8 +185,7 @@ async function analisar() {
     const res = await fetch('/api/analisar', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 1500, messages: [{ role: 'user', content: prompt }] })
-    });
+     body: JSON.stringify({ vagaUrl: url, cvTexto: cvTexto })
     clearInterval(interval);
     fillEl.style.width='100%';
     await sleep(300);
