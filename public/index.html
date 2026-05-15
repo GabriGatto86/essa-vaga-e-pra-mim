@@ -182,7 +182,7 @@ async function analisar() {
   const interval=setInterval(()=>{ si=Math.min(si+1,STEPS.length-1); stepEl.textContent=STEPS[si]; fillEl.style.width=(15+si*16)+'%'; },1600);
   const prompt = 'Você é um especialista sênior em recrutamento e seleção com 20 anos de experiência. Analise a compatibilidade.\n\nLINK DA VAGA: ' + url + '\n\nCURRÍCULO:\n' + cvTexto + '\n\nRetorne SOMENTE um JSON válido:\n{"score":[0-100],"veredicto":"APROVADO"|"ATENÇÃO"|"NÃO RECOMENDADO","resumo":"2 frases","pontos_fortes":["p1","p2","p3"],"gaps":["g1","g2","g3"],"cursos":[{"nome":"nome","plataforma":"plataforma","motivo":"motivo"}],"proximos_passos":["a1","a2","a3"]}';
   try {
-    const res = await fetch('https://api.anthropic.com/v1/messages', {
+    const res = await fetch('/api/analisar', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 1500, messages: [{ role: 'user', content: prompt }] })
