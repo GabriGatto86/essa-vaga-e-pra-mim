@@ -170,7 +170,7 @@ async function analisar() {
     const res = await fetch('/api/analisar', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ vagaUrl: url, cvBase64: cvBase64 })
+      body: JSON.stringify({ vagaUrl: url, cvBase64: cvBase64, cvTipo: document.getElementById('cv-file').files[0]?.type || '' })
     });
     clearInterval(interval);
     fillEl.style.width='100%';
