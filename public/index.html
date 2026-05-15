@@ -9,24 +9,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet">
 <style>
-:root {
-  --azul: #005BAA;
-  --azul-esc: #003F7F;
-  --amar: #F5C200;
-  --amar-dk: #C4960A;
-  --branco: #FFFFFF;
-  --fundo: #EEF3FA;
-  --card: #FFFFFF;
-  --borda: #D4E1F0;
-  --texto: #0D1B3E;
-  --muted: #6B82A8;
-  --verde: #0C7A55;
-  --verde-lt: #E4F5EE;
-  --verm: #B91C1C;
-  --verm-lt: #FEF2F2;
-  --amber: #B45309;
-  --roxo: #6D28D9;
-}
+:root{--azul:#005BAA;--azul-esc:#003F7F;--amar:#F5C200;--branco:#FFFFFF;--fundo:#EEF3FA;--card:#FFFFFF;--borda:#D4E1F0;--texto:#0D1B3E;--muted:#6B82A8;--verde:#0C7A55;--verde-lt:#E4F5EE;--verm:#B91C1C;--verm-lt:#FEF2F2}
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'DM Sans',sans-serif;background:var(--fundo);color:var(--texto);min-height:100vh}
 header{background:var(--azul-esc);height:58px;display:flex;align-items:center;justify-content:space-between;padding:0 24px;position:sticky;top:0;z-index:100;box-shadow:0 2px 20px rgba(0,0,0,.25)}
@@ -106,10 +89,7 @@ footer .disc{font-size:11.5px;color:#A8BDD4;display:block;margin-top:6px}
 </head>
 <body>
 <header>
-  <div class="logo-h">
-    <div class="logo-ico">🎯</div>
-    <span class="logo-txt">Essa vaga é <span>pra mim?</span></span>
-  </div>
+  <div class="logo-h"><div class="logo-ico">🎯</div><span class="logo-txt">Essa vaga é <span>pra mim?</span></span></div>
   <span class="by">por <a href="https://www.linkedin.com/in/gabriel-gatto/" target="_blank">Gabriel Gatto</a></span>
 </header>
 <div class="hero">
@@ -151,17 +131,23 @@ footer .disc{font-size:11.5px;color:#A8BDD4;display:block;margin-top:6px}
 <footer>
   Criado por <a href="https://www.linkedin.com/in/gabriel-gatto/" target="_blank">Gabriel Gatto</a> · Gerente de Atração & Seleção · Banco Daycoval
   <span class="disc">Seus dados não são armazenados. Análise feita em tempo real por IA.</span>
-</footer><script>
-let cvTexto = '';
+  <script>
+let cvBase64 = '';
+let cvNome = '';
 
-document.getElementById('cv-file').addEventListener('change', async function(e) {
+document.getElementById('cv-file').addEventListener('change', function(e) {
   const file = e.target.files[0];
   if (!file) return;
-  document.getElementById('upload-area').innerHTML = '<div class="upload-ok"><span class="u-ico2">✅</span><div class="u-info"><p>' + file.name + '</p><small>Anexado com sucesso · pronto para análise</small></div></div>';
-  try { cvTexto = (await file.text()).slice(0, 10000); } catch { cvTexto = '[arquivo enviado]'; }
-  const av = document.getElementById('aviso');
-  av.style.display = 'block';
-  av.textContent = file.type === 'text/plain' ? '✓ TXT garante leitura mais precisa!' : '✓ Arquivo recebido para análise.';
+  cvNome = file.name;
+  const reader = new FileReader();
+  reader.onload = function(ev) {
+    cvBase64 = ev.target.result.split(',')[1];
+    document.getElementById('upload-area').innerHTML = '<div class="upload-ok"><span class="u-ico2">✅</span><div class="u-info"><p>' + file.name + '</p><small>Anexado com sucesso · pronto para análise</small></div></div>';
+    const av = document.getElementById('aviso');
+    av.style.display = 'block';
+    av.textContent = '✓ Arquivo recebido para análise.';
+  };
+  reader.readAsDataURL(file);
 });
 
 const STEPS = ['Lendo a vaga...','Analisando seu currículo...','Cruzando requisitos...','Calculando compatibilidade...','Preparando recomendações...'];
@@ -172,7 +158,7 @@ async function analisar() {
   const url = document.getElementById('vaga-url').value.trim();
   document.getElementById('err-box').style.display='none';
   if (!url) { showErr('Por favor, cole o link da vaga antes de continuar.'); return; }
-  if (!cvTexto) { showErr('Por favor, anexe seu currículo antes de continuar.'); return; }
+  if (!cvBase64) { showErr('Por favor, anexe seu currículo antes de continuar.'); return; }
   document.getElementById('btn-analisar').disabled=true;
   document.getElementById('form-card').style.display='none';
   document.getElementById('loading').style.display='block';
@@ -180,22 +166,19 @@ async function analisar() {
   const fillEl=document.getElementById('l-fill');
   let si=0;
   const interval=setInterval(()=>{ si=Math.min(si+1,STEPS.length-1); stepEl.textContent=STEPS[si]; fillEl.style.width=(15+si*16)+'%'; },1600);
-  const prompt = 'Você é um especialista sênior em recrutamento e seleção com 20 anos de experiência. Analise a compatibilidade.\n\nLINK DA VAGA: ' + url + '\n\nCURRÍCULO:\n' + cvTexto + '\n\nRetorne SOMENTE um JSON válido:\n{"score":[0-100],"veredicto":"APROVADO"|"ATENÇÃO"|"NÃO RECOMENDADO","resumo":"2 frases","pontos_fortes":["p1","p2","p3"],"gaps":["g1","g2","g3"],"cursos":[{"nome":"nome","plataforma":"plataforma","motivo":"motivo"}],"proximos_passos":["a1","a2","a3"]}';
   try {
     const res = await fetch('/api/analisar', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-     body: JSON.stringify({ vagaUrl: url, cvTexto: cvTexto })
+      body: JSON.stringify({ vagaUrl: url, cvBase64: cvBase64 })
+    });
     clearInterval(interval);
     fillEl.style.width='100%';
     await sleep(300);
     document.getElementById('loading').style.display='none';
+    if (!res.ok) { document.getElementById('form-card').style.display='block'; showErr('Erro ao processar. Tente novamente.'); return; }
     const data = await res.json();
-    const raw = data?.content?.[0]?.text || '';
-    let json;
-    try { json = JSON.parse(raw.replace(/```json|```/g,'').trim()); }
-    catch { document.getElementById('form-card').style.display='block'; showErr('Erro ao processar. Tente novamente.'); return; }
-    await renderResult(json);
+    await renderResult(data);
   } catch(e) {
     clearInterval(interval);
     document.getElementById('loading').style.display='none';
@@ -224,10 +207,10 @@ async function renderResult(d) {
 }
 
 function resetar(){
-  cvTexto='';
+  cvBase64=''; cvNome='';
   document.getElementById('vaga-url').value='';
   document.getElementById('upload-area').innerHTML='<input type="file" id="cv-file" accept=".pdf,.txt,.doc,.docx" /><span class="u-ico">📄</span><p>Clique para anexar seu currículo</p><small>PDF, TXT, DOC ou DOCX · máx. 5MB</small>';
-  document.getElementById('cv-file').addEventListener('change',async function(e){const file=e.target.files[0];if(!file)return;document.getElementById('upload-area').innerHTML='<div class="upload-ok"><span class="u-ico2">✅</span><div class="u-info"><p>'+file.name+'</p><small>Anexado com sucesso</small></div></div>';try{cvTexto=(await file.text()).slice(0,10000);}catch{cvTexto='[arquivo enviado]';}});
+  document.getElementById('cv-file').addEventListener('change',function(e){const file=e.target.files[0];if(!file)return;const reader=new FileReader();reader.onload=function(ev){cvBase64=ev.target.result.split(',')[1];document.getElementById('upload-area').innerHTML='<div class="upload-ok"><span class="u-ico2">✅</span><div class="u-info"><p>'+file.name+'</p><small>Anexado com sucesso</small></div></div>';};reader.readAsDataURL(file);});
   document.getElementById('aviso').style.display='none';
   document.getElementById('result').style.display='none';
   document.getElementById('err-box').style.display='none';
@@ -238,3 +221,4 @@ function resetar(){
 </script>
 </body>
 </html>
+</footer>
