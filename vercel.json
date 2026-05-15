@@ -1,11 +1,15 @@
 {
   "version": 2,
-  "functions": {
-    "api/analisar.js": {
-      "memory": 512,
-      "maxDuration": 30
+  "builds": [
+    {
+      "src": "api/analisar.js",
+      "use": "@vercel/node"
+    },
+    {
+      "src": "public/**",
+      "use": "@vercel/static"
     }
-  },
+  ],
   "routes": [
     {
       "src": "/api/analisar",
