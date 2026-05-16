@@ -93,6 +93,9 @@ function lerBody(req) {
 }
 
 module.exports = async (req, res) => {
+  const t0 = Date.now();
+  const log = (...args) => console.log(`[${Date.now() - t0}ms]`, ...args);
+
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
@@ -100,12 +103,22 @@ module.exports = async (req, res) => {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Método não permitido' });
 
   try {
-    if (!process.env.ANTHROPIC_API_KEY) {
-      return res.status(500).json({ error: 'ANTHROPIC_API_KEY não configurada no servidor.' });
+    log('start', req.headers['content-length'], 'bytes');
+
+    if (!process.env.GROQ_API_KEY) {
+      return res.status(500).json({ error: 'GROQ_API_KEY não configurada no servidor.' });
     }
 
-    const { vagaUrl, cvBase64, cvTipo } = await lerBody(req);
-    if (!vagaUrl) return res.status(400).json({ error: 'Link da vaga não informado.' });
+    const { vagaTexto: vagaTextoInput, cvBase64, cvTipo } = await lerBody(req);
+    log('body parsed, cvBase64 len:', (cvBase64 || '').length, 'tipo:', cvTipo, 'vagaTexto:', (vagaTextoInput || '').length);
+
+    if (!vagaTextoInput || vagaTextoInput.trim().length < 100) {
+      return res.status(400).json({ error: 'Cole o texto completo da descrição da vaga (mínimo 100 caracteres) — requisitos, responsabilidades e atribuições.' });
+    }
+
+    if ((cvBase64 || '').length > 4_500_000) {
+      return res.status(413).json({ error: 'Arquivo muito grande. Envie um arquivo de até 3MB.' });
+    }
 
     const buffer = Buffer.from(cvBase64 || '', 'base64');
     const tipo = (cvTipo || '').toLowerCase();
@@ -114,33 +127,66 @@ module.exports = async (req, res) => {
     try {
       if (tipo.includes('pdf')) {
         const data = await pdfParse(buffer);
-        cvTexto = (data.text || '').slice(0, 6000);
+        cvTexto = (data.text || '').slice(0, 20000);
       } else if (tipo.includes('officedocument') || tipo.includes('word') || tipo.includes('docx')) {
-        cvTexto = (lerDOCX(buffer) || '').slice(0, 6000);
+        cvTexto = (lerDOCX(buffer) || '').slice(0, 20000);
       } else {
-        cvTexto = buffer.toString('utf-8').slice(0, 6000);
+        cvTexto = buffer.toString('utf-8').slice(0, 20000);
       }
     } catch (e) {
-      cvTexto = buffer.toString('utf-8').replace(/[^\x20-\x7EÀ-ɏ\n]/g, ' ').slice(0, 6000);
+      cvTexto = buffer.toString('utf-8').replace(/[^\x20-\x7EÀ-ɏ\n]/g, ' ').slice(0, 20000);
     }
 
-    const prompt = `Você é especialista sênior em recrutamento com 20 anos de experiência.\n\nLINK DA VAGA: ${vagaUrl}\n\nCURRÍCULO:\n${cvTexto || 'não enviado'}\n\nRetorne SOMENTE este JSON:\n{"score":75,"veredicto":"ATENÇÃO","resumo":"frase 1. frase 2.","pontos_fortes":["p1","p2","p3"],"gaps":["g1","g2","g3"],"cursos":[{"nome":"curso","plataforma":"Alura","motivo":"motivo"}],"proximos_passos":["a1","a2","a3"]}`;
+    const vagaTextoFinal = vagaTextoInput.trim().slice(0, 20000);
+    log('cv:', cvTexto.length, 'vaga:', vagaTextoFinal.length);
+
+    const prompt = `Você é especialista sênior em recrutamento. Avalie HONESTAMENTE a compatibilidade entre o currículo e a vaga.
+
+REGRAS OBRIGATÓRIAS:
+1. Se a vaga e o currículo são de ÁREAS PROFISSIONAIS DIFERENTES (ex: RH vs TI, Marketing vs Engenharia, Vendas vs Jurídico), score ≤ 20 e veredicto "NÃO RECOMENDADO". Explique no resumo que são áreas distintas.
+2. Score ≥ 70 SÓ se o candidato atende a maioria dos requisitos técnicos/experiência específicos da vaga.
+3. Pontos fortes devem citar requisitos da VAGA que o CV atende. Gaps devem citar requisitos da VAGA que o CV NÃO atende.
+4. Cursos e próximos passos devem MIRAR NOS GAPS DA VAGA, não enriquecer a área atual do candidato. Se a vaga é de Recursos Humanos, recomende cursos de RH (não de TI), mesmo que o candidato seja de TI.
+5. Seja explícito sobre incompatibilidades. NÃO infle scores.
+
+DESCRIÇÃO DA VAGA:
+${vagaTextoFinal}
+
+CURRÍCULO DO CANDIDATO:
+${cvTexto || '[NÃO FORNECIDO]'}
+
+Retorne SOMENTE este JSON, sem markdown, sem comentários (use os tipos indicados):
+{
+  "score": <inteiro 0-100>,
+  "veredicto": "APROVADO" | "ATENÇÃO" | "NÃO RECOMENDADO",
+  "resumo": "<2-3 frases honestas sobre o match real entre vaga e CV>",
+  "pontos_fortes": ["<requisito da vaga que o CV atende>", "<idem>", "<idem>"],
+  "gaps": ["<requisito da vaga que falta no CV>", "<idem>", "<idem>"],
+  "cursos": [
+    {"nome": "<curso real>", "plataforma": "Coursera|Alura|LinkedIn Learning|Udemy|YouTube|dio.me", "motivo": "<como fecha um gap específico desta vaga>"},
+    {"nome": "<curso real>", "plataforma": "<>", "motivo": "<>"}
+  ],
+  "proximos_passos": ["<ação concreta pra atender ESTA vaga>", "<>", "<>"]
+}`;
 
     const payload = JSON.stringify({
-      model: 'claude-sonnet-4-20250514',
+      model: 'llama-3.3-70b-versatile',
       max_tokens: 1500,
+      temperature: 0.2,
+      response_format: { type: 'json_object' },
       messages: [{ role: 'user', content: prompt }]
     });
 
+    log('calling groq, payload size:', payload.length);
     const apiRes = await new Promise((resolve, reject) => {
       const apiReq = https.request({
-        hostname: 'api.anthropic.com',
-        path: '/v1/messages',
+        hostname: 'api.groq.com',
+        path: '/openai/v1/chat/completions',
         method: 'POST',
+        timeout: 25000,
         headers: {
           'Content-Type': 'application/json',
-          'x-api-key': process.env.ANTHROPIC_API_KEY,
-          'anthropic-version': '2023-06-01',
+          'Authorization': `Bearer ${process.env.GROQ_API_KEY}`,
           'Content-Length': Buffer.byteLength(payload)
         }
       }, r => {
@@ -149,28 +195,39 @@ module.exports = async (req, res) => {
         r.on('end', () => resolve({ status: r.statusCode, data }));
       });
       apiReq.on('error', reject);
+      apiReq.on('timeout', () => { apiReq.destroy(new Error('A IA demorou para responder (mais de 25s). Tente novamente em alguns segundos.')); });
       apiReq.write(payload);
       apiReq.end();
     });
+    log('groq responded, status:', apiRes.status);
 
     let apiData;
     try { apiData = JSON.parse(apiRes.data); } catch { apiData = {}; }
 
     if (apiRes.status !== 200) {
-      return res.status(502).json({ error: apiData?.error?.message || `Anthropic respondeu ${apiRes.status}` });
+      log('groq error:', apiData?.error);
+      const msg = apiData?.error?.message || `Groq respondeu ${apiRes.status}`;
+      if (apiRes.status === 429) {
+        return res.status(429).json({ error: 'Muitas análises em pouco tempo. Aguarde 1 minuto e tente novamente.' });
+      }
+      return res.status(502).json({ error: msg });
     }
 
-    const text = apiData?.content?.[0]?.text || '';
+    const text = apiData?.choices?.[0]?.message?.content || '';
     let resultado;
     try {
       resultado = JSON.parse(text.replace(/```json|```/g, '').trim());
     } catch {
+      log('JSON parse failed, raw:', text.slice(0, 200));
       return res.status(500).json({ error: 'Resposta da IA não pôde ser interpretada. Tente novamente.' });
     }
+    resultado.vaga_lida = vagaTextoFinal.length > 0;
+    resultado.cv_lido = cvTexto.length > 50;
+    log('success, vaga_lida:', resultado.vaga_lida);
     return res.status(200).json(resultado);
 
   } catch (e) {
-    console.error('Erro no handler:', e);
+    log('handler error:', e.message, e.stack?.split('\n')[1]);
     return res.status(500).json({ error: e.message || 'Erro interno.' });
   }
 };
