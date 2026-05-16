@@ -2,7 +2,7 @@
 
 App de análise de compatibilidade entre candidato e vaga, usando IA (Claude da Anthropic).
 
-Criado por **Gabriel Gatto** — Gerente de Atração & Seleção · Banco Daycoval
+Criado por **Gabriel Gatto**
 
 ---
 
