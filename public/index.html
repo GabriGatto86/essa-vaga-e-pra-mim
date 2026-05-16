@@ -7,31 +7,31 @@
 <meta name="description" content="Cole o link da vaga, anexe seu currículo e descubra sua compatibilidade em segundos.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
 :root{--azul:#005BAA;--azul-esc:#003F7F;--amar:#F5C200;--branco:#FFFFFF;--fundo:#EEF3FA;--card:#FFFFFF;--borda:#D4E1F0;--texto:#0D1B3E;--muted:#6B82A8;--verde:#0C7A55;--verde-lt:#E4F5EE;--verm:#B91C1C;--verm-lt:#FEF2F2}
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'DM Sans',sans-serif;background:var(--fundo);color:var(--texto);min-height:100vh}
+body{font-family:'Inter',sans-serif;background:var(--fundo);color:var(--texto);min-height:100vh;line-height:1.5;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
 header{background:var(--azul-esc);height:58px;display:flex;align-items:center;justify-content:space-between;padding:0 24px;position:sticky;top:0;z-index:100;box-shadow:0 2px 20px rgba(0,0,0,.25)}
 .logo-h{display:flex;align-items:center;gap:10px}
 .logo-ico{width:32px;height:32px;background:var(--amar);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:17px}
-.logo-txt{font-family:'Syne',sans-serif;font-weight:700;font-size:15px;color:#fff}
+.logo-txt{font-family:'Inter',sans-serif;font-weight:700;font-size:15px;color:#fff}
 .logo-txt span{color:var(--amar)}
 .by{font-size:12px;color:rgba(255,255,255,.45)}
 .by a{color:var(--amar);text-decoration:none;font-weight:500}
 .hero{background:linear-gradient(140deg,var(--azul-esc) 0%,var(--azul) 55%,#1A72C0 100%);padding:56px 20px 72px;text-align:center;position:relative;overflow:hidden}
 .badge{display:inline-flex;align-items:center;gap:7px;background:rgba(245,194,0,.15);border:1px solid rgba(245,194,0,.35);border-radius:99px;padding:5px 16px;font-size:12px;font-weight:500;color:var(--amar);margin-bottom:22px}
-.hero h1{font-family:'Syne',sans-serif;font-size:clamp(30px,5.5vw,50px);font-weight:800;color:#fff;line-height:1.1;margin-bottom:16px}
+.hero h1{font-family:'Inter',sans-serif;font-size:clamp(30px,5.5vw,50px);font-weight:800;color:#fff;line-height:1.2;margin-bottom:16px;letter-spacing:-0.02em}
 .hero h1 span{color:var(--amar)}
 .hero p{font-size:16px;color:rgba(255,255,255,.72);max-width:460px;margin:0 auto 36px;line-height:1.7;font-weight:300}
 .stats{display:flex;justify-content:center;gap:36px;flex-wrap:wrap}
-.stat-n{font-family:'Syne',sans-serif;font-size:26px;font-weight:800;color:var(--amar)}
+.stat-n{font-family:'Inter',sans-serif;font-size:26px;font-weight:800;color:var(--amar)}
 .stat-l{font-size:12px;color:rgba(255,255,255,.5);margin-top:2px}
 main{max-width:620px;margin:-32px auto 64px;padding:0 16px;position:relative;z-index:10}
 .card{background:var(--card);border:1px solid var(--borda);border-radius:18px;padding:28px;box-shadow:0 4px 28px rgba(0,63,127,.09);margin-bottom:14px}
 .f-label{display:flex;align-items:center;gap:8px;font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:9px}
 .f-label .pip{width:6px;height:6px;border-radius:50%;background:var(--azul);flex-shrink:0}
-input[type=text]{width:100%;padding:13px 15px;font-size:14px;font-family:'DM Sans',sans-serif;color:var(--texto);background:var(--fundo);border:1.5px solid var(--borda);border-radius:10px;outline:none;transition:border-color .2s,box-shadow .2s}
+input[type=text]{width:100%;padding:13px 15px;font-size:14px;font-family:'Inter',sans-serif;color:var(--texto);background:var(--fundo);border:1.5px solid var(--borda);border-radius:10px;outline:none;transition:border-color .2s,box-shadow .2s}
 input[type=text]:focus{border-color:var(--azul);box-shadow:0 0 0 3px rgba(0,91,170,.1);background:#fff}
 input[type=text]::placeholder{color:#A8BDD4}
 .mb-20{margin-bottom:20px}
@@ -46,7 +46,7 @@ input[type=text]::placeholder{color:#A8BDD4}
 .upload-ok .u-info p{font-size:14px;font-weight:600;color:var(--verde)}
 .upload-ok .u-info small{font-size:12px;color:#38A882}
 .aviso{display:none;background:#EBF3FF;border:1px solid #B0CCF0;border-radius:10px;padding:10px 14px;font-size:12.5px;color:var(--azul);margin-top:10px}
-.btn{width:100%;padding:15px;background:var(--azul);color:var(--amar);font-family:'Syne',sans-serif;font-size:16px;font-weight:700;border:none;border-radius:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;transition:all .2s;box-shadow:0 4px 18px rgba(0,91,170,.3);margin-top:24px}
+.btn{width:100%;padding:15px;background:var(--azul);color:var(--amar);font-family:'Inter',sans-serif;font-size:16px;font-weight:700;border:none;border-radius:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;transition:all .2s;box-shadow:0 4px 18px rgba(0,91,170,.3);margin-top:24px}
 .btn:hover{background:var(--azul-esc);transform:translateY(-1px)}
 .btn:disabled{opacity:.4;cursor:not-allowed;transform:none}
 .err{display:none;background:var(--verm-lt);border:1px solid #FCA5A5;border-radius:10px;padding:12px 15px;font-size:13px;color:var(--verm);margin-top:12px}
@@ -59,11 +59,11 @@ input[type=text]::placeholder{color:#A8BDD4}
 .result{display:none}
 .score-hero{background:linear-gradient(135deg,var(--azul-esc),var(--azul));border-radius:16px;padding:28px 22px;text-align:center;margin-bottom:14px}
 .s-top{font-size:12px;color:rgba(255,255,255,.55);text-transform:uppercase;letter-spacing:.1em;margin-bottom:8px}
-.s-num{font-family:'Syne',sans-serif;font-size:80px;font-weight:800;line-height:1;margin-bottom:4px}
+.s-num{font-family:'Inter',sans-serif;font-size:80px;font-weight:800;line-height:1.1;margin-bottom:4px;letter-spacing:-0.03em}
 .s-sub{font-size:13px;color:rgba(255,255,255,.6);margin-bottom:20px;line-height:1.5;max-width:400px;margin-left:auto;margin-right:auto}
 .s-bar-bg{background:rgba(255,255,255,.15);border-radius:99px;height:8px;overflow:hidden;margin-bottom:18px}
 .s-bar{height:100%;border-radius:99px;width:0;transition:width 1.4s cubic-bezier(.4,0,.2,1)}
-.chip{display:inline-flex;align-items:center;gap:8px;border-radius:99px;padding:8px 20px;font-family:'Syne',sans-serif;font-size:13px;font-weight:700}
+.chip{display:inline-flex;align-items:center;gap:8px;border-radius:99px;padding:8px 20px;font-family:'Inter',sans-serif;font-size:13px;font-weight:700}
 .r-sec{background:var(--card);border:1px solid var(--borda);border-radius:14px;padding:22px;margin-bottom:12px}
 .r-title{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;margin-bottom:13px;display:flex;align-items:center;gap:8px}
 .r-ico{width:27px;height:27px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0}
@@ -78,9 +78,9 @@ input[type=text]::placeholder{color:#A8BDD4}
 .c-mot{font-size:12.5px;color:var(--muted);line-height:1.5}
 .p-item{display:flex;gap:11px;padding:11px 13px;background:var(--fundo);border-radius:9px;margin-bottom:7px;opacity:0;transform:translateY(8px);transition:all .4s ease}
 .p-item.show{opacity:1;transform:none}
-.p-num{width:25px;height:25px;border-radius:50%;background:var(--azul);color:var(--amar);font-family:'Syne',sans-serif;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.p-num{width:25px;height:25px;border-radius:50%;background:var(--azul);color:var(--amar);font-family:'Inter',sans-serif;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
 .p-item p{font-size:13.5px;color:var(--texto);line-height:1.55}
-.btn-novo{width:100%;padding:12px;background:transparent;color:var(--muted);font-family:'DM Sans',sans-serif;font-size:14px;border:1.5px solid var(--borda);border-radius:12px;cursor:pointer;margin-top:8px;transition:all .2s}
+.btn-novo{width:100%;padding:12px;background:transparent;color:var(--muted);font-family:'Inter',sans-serif;font-size:14px;border:1.5px solid var(--borda);border-radius:12px;cursor:pointer;margin-top:8px;transition:all .2s}
 .btn-novo:hover{border-color:var(--azul);color:var(--azul)}
 footer{text-align:center;padding:28px 16px 48px;font-size:13px;color:var(--muted)}
 footer a{color:var(--azul);text-decoration:none;font-weight:500}
@@ -95,7 +95,7 @@ footer .disc{font-size:11.5px;color:#A8BDD4;display:block;margin-top:6px}
 <div class="hero">
   <div class="badge">✨ Powered by IA · 100% gratuito</div>
   <h1>Descubra se a vaga<br>é <span>pra você</span></h1>
-  <p>Cole o link da vaga, anexe seu currículo e receba em segundos sua compatibilidade real, os gaps e o caminho exato pra chegar lá.</p>
+  <p>Cole a descrição da vaga, anexe seu currículo e receba em segundos sua compatibilidade real, os gaps e o caminho exato pra chegar lá.</p>
   <div class="stats">
     <div><div class="stat-n">100%</div><div class="stat-l">gratuito</div></div>
     <div><div class="stat-n">&lt;30s</div><div class="stat-l">análise completa</div></div>
@@ -104,9 +104,16 @@ footer .disc{font-size:11.5px;color:#A8BDD4;display:block;margin-top:6px}
 </div>
 <main>
   <div class="card" id="form-card">
+    <div style="display:flex;align-items:flex-start;gap:12px;background:#FFFBEB;border:1.5px solid #F5C200;border-radius:12px;padding:14px 16px;margin-bottom:20px">
+      <span style="font-size:22px;line-height:1;flex-shrink:0">📋</span>
+      <div>
+        <strong style="display:block;font-size:13.5px;color:#7C2D12;font-weight:700;margin-bottom:4px">Cole a descrição completa da vaga abaixo</strong>
+        <span style="font-size:12.5px;color:#92400E;line-height:1.55;display:block">LinkedIn, Gupy, Catho, InHire, Glassdoor e a maior parte dos ATSs bloqueiam leitura automática por link. Copie do anúncio o texto da vaga — requisitos, responsabilidades, formação esperada e benefícios. Quanto mais detalhada a descrição, mais precisa a análise.</span>
+      </div>
+    </div>
     <div class="mb-20">
-      <div class="f-label"><span class="pip"></span> Link da vaga</div>
-      <input type="text" id="vaga-url" placeholder="Cole aqui o link (LinkedIn, Gupy, Indeed, Catho...)" />
+      <div class="f-label"><span class="pip"></span> Descrição da vaga</div>
+      <textarea id="vaga-texto" placeholder="Cole aqui o texto completo da vaga: cargo, requisitos, responsabilidades, formação, experiência exigida, benefícios..." rows="8" style="width:100%;padding:13px 15px;font-size:13.5px;font-family:'Inter',sans-serif;color:var(--texto);background:var(--fundo);border:1.5px solid var(--borda);border-radius:10px;outline:none;resize:vertical;min-height:160px;line-height:1.55;transition:border-color .2s,box-shadow .2s"></textarea>
     </div>
     <div>
       <div class="f-label"><span class="pip"></span> Seu currículo</div>
@@ -129,16 +136,23 @@ footer .disc{font-size:11.5px;color:#A8BDD4;display:block;margin-top:6px}
   <div class="result" id="result"></div>
 </main>
 <footer>
-  Criado por <a href="https://www.linkedin.com/in/gabriel-gatto/" target="_blank">Gabriel Gatto</a> · Gerente de Atração & Seleção · Banco Daycoval
+  Criado por <a href="https://www.linkedin.com/in/gabriel-gatto/" target="_blank">Gabriel Gatto</a>
   <span class="disc">Seus dados não são armazenados. Análise feita em tempo real por IA.</span>
   <script>
 let cvBase64 = '';
 let cvNome = '';
+let cvTipo = '';
 
 document.getElementById('cv-file').addEventListener('change', function(e) {
   const file = e.target.files[0];
   if (!file) return;
+  if (file.size > 3 * 1024 * 1024) {
+    showErr('Arquivo muito grande (' + (file.size/1024/1024).toFixed(1) + 'MB). Limite: 3MB.');
+    e.target.value = '';
+    return;
+  }
   cvNome = file.name;
+  cvTipo = file.type || '';
   const reader = new FileReader();
   reader.onload = function(ev) {
     cvBase64 = ev.target.result.split(',')[1];
@@ -155,9 +169,9 @@ function sleep(ms){ return new Promise(r=>setTimeout(r,ms)); }
 function showErr(msg){ const el=document.getElementById('err-box'); el.textContent=msg; el.style.display='block'; document.getElementById('btn-analisar').disabled=false; }
 
 async function analisar() {
-  const url = document.getElementById('vaga-url').value.trim();
+  const vagaTexto = document.getElementById('vaga-texto').value.trim();
   document.getElementById('err-box').style.display='none';
-  if (!url) { showErr('Por favor, cole o link da vaga antes de continuar.'); return; }
+  if (vagaTexto.length < 100) { showErr('Cole a descrição completa da vaga (mínimo 100 caracteres) — quanto mais detalhada, mais precisa a análise.'); return; }
   if (!cvBase64) { showErr('Por favor, anexe seu currículo antes de continuar.'); return; }
   document.getElementById('btn-analisar').disabled=true;
   document.getElementById('form-card').style.display='none';
@@ -170,20 +184,27 @@ async function analisar() {
     const res = await fetch('/api/analisar', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ vagaUrl: url, cvBase64: cvBase64, cvTipo: document.getElementById('cv-file').files[0]?.type || '' })
+      body: JSON.stringify({ vagaTexto: vagaTexto, cvBase64: cvBase64, cvTipo: cvTipo })
     });
     clearInterval(interval);
     fillEl.style.width='100%';
     await sleep(300);
     document.getElementById('loading').style.display='none';
-    if (!res.ok) { document.getElementById('form-card').style.display='block'; showErr('Erro ao processar. Tente novamente.'); return; }
+    if (!res.ok) {
+      let msg = 'Erro ao processar. Tente novamente.';
+      try { const j = await res.json(); if (j.error) msg = j.error; } catch {}
+      document.getElementById('form-card').style.display='block';
+      showErr('[' + res.status + '] ' + msg);
+      return;
+    }
     const data = await res.json();
     await renderResult(data);
   } catch(e) {
     clearInterval(interval);
     document.getElementById('loading').style.display='none';
     document.getElementById('form-card').style.display='block';
-    showErr('Erro de conexão. Verifique sua internet e tente novamente.');
+    console.error('Fetch falhou:', e);
+    showErr('Erro de conexão: ' + (e.message || e.name || 'desconhecido') + '. Tente novamente.');
     document.getElementById('btn-analisar').disabled=false;
   }
 }
@@ -207,10 +228,20 @@ async function renderResult(d) {
 }
 
 function resetar(){
-  cvBase64=''; cvNome='';
-  document.getElementById('vaga-url').value='';
-  document.getElementById('upload-area').innerHTML='<input type="file" id="cv-file" accept=".pdf,.txt,.doc,.docx" /><span class="u-ico">📄</span><p>Clique para anexar seu currículo</p><small>PDF, TXT, DOC ou DOCX · máx. 5MB</small>';
-  document.getElementById('cv-file').addEventListener('change',function(e){const file=e.target.files[0];if(!file)return;const reader=new FileReader();reader.onload=function(ev){cvBase64=ev.target.result.split(',')[1];document.getElementById('upload-area').innerHTML='<div class="upload-ok"><span class="u-ico2">✅</span><div class="u-info"><p>'+file.name+'</p><small>Anexado com sucesso</small></div></div>';};reader.readAsDataURL(file);});
+  cvBase64=''; cvNome=''; cvTipo='';
+  document.getElementById('vaga-texto').value='';
+  document.getElementById('upload-area').innerHTML='<input type="file" id="cv-file" accept=".pdf,.txt,.doc,.docx" /><span class="u-ico">📄</span><p>Clique para anexar seu currículo</p><small>PDF, TXT, DOC ou DOCX · máx. 3MB</small>';
+  document.getElementById('cv-file').addEventListener('change',function(e){
+    const file=e.target.files[0]; if(!file) return;
+    if(file.size > 3*1024*1024){ showErr('Arquivo muito grande ('+(file.size/1024/1024).toFixed(1)+'MB). Limite: 3MB.'); e.target.value=''; return; }
+    cvNome=file.name; cvTipo=file.type||'';
+    const reader=new FileReader();
+    reader.onload=function(ev){
+      cvBase64=ev.target.result.split(',')[1];
+      document.getElementById('upload-area').innerHTML='<div class="upload-ok"><span class="u-ico2">✅</span><div class="u-info"><p>'+file.name+'</p><small>Anexado com sucesso</small></div></div>';
+    };
+    reader.readAsDataURL(file);
+  });
   document.getElementById('aviso').style.display='none';
   document.getElementById('result').style.display='none';
   document.getElementById('err-box').style.display='none';
